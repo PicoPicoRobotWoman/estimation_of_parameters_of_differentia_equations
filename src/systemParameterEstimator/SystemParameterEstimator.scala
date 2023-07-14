@@ -15,14 +15,14 @@ trait SystemParameterEstimator extends StringCalculator {
     })
 
     reverseSystems.zipWithIndex.map( sys_index => {
-      val expression1: String = calkFun(sys_index._1, "F", Fi0)
-      val expression2: String = calkFun(expression1, "y", yi0)
+      val expression1: String = replaceVariableValues(sys_index._1, "F", Fi0)
+      val expression2: String = replaceVariableValues(expression1, "y", yi0)
       calculate(expression2)
     })
 
   }
 
-  private def calkFun(fun: String,symbol: String , values: List[Double]): String = {
+  private def replaceVariableValues(fun: String,symbol: String , values: List[Double]): String = {
     values.indices.foldLeft(fun)((acc, i) => acc.replace(s"$symbol${i + 1}", s"(${values(i)})"))
   }
 
