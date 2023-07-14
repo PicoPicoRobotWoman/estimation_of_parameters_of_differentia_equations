@@ -14,12 +14,16 @@ trait SystemParameterEstimator extends StringCalculator {
       (-n to n).zip(yi).map(k_y => k_y._1 * k_y._2 * h).sum / (-n to n).map(k => Math.pow(k * h, 2)).sum
     })
 
-    reverseSystems.zipWithIndex.map( sys_index => calkFun(sys_index._1.replace("F", s"${Fi0(sys_index._2)}"), yi0))
+    reverseSystems.zipWithIndex.map( sys_index => {
+      val expression1: String = calkFun(sys_index._1, "F", Fi0)
+      val expression2: String = calkFun(expression1, "y", yi0)
+      calculate(expression2)
+    })
 
   }
 
-  private def calkFun(fun: String, values: List[Double]): Double = {
-    calculate(values.indices.foldLeft(fun)((acc, i) => acc.replace(s"y${i + 1}", s"(${values(i)})")))
+  private def calkFun(fun: String,symbol: String , values: List[Double]): String = {
+    values.indices.foldLeft(fun)((acc, i) => acc.replace(s"$symbol${i + 1}", s"(${values(i)})"))
   }
 
 }
