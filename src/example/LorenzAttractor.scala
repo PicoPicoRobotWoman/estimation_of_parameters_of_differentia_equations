@@ -9,10 +9,6 @@ import scala.util.Random
 
 object LorenzAttractor extends App with StringCalculator with ConstantFabric with BinaryOperationFabric with SystemParameterEstimator {
 
-  addConstant(createConstant("b1", 3))
-  addConstant(createConstant("b2", 5))
-  addConstant(createConstant("b3", 2))
-
   addBinaryOperation(createBinary("+", 1, (left, right) => left + right, 0))
   addBinaryOperation(createBinary("-", 1, (left, right) => left - right, 0))
   addBinaryOperation(createBinary("*", 2, (left, right) => left * right, 1))
@@ -24,17 +20,24 @@ object LorenzAttractor extends App with StringCalculator with ConstantFabric wit
   val alpha = 1.25
   val h = Math.pow(n, -alpha)
 
+  val bi: List[Double] = List(2, 3, 1)
   val yi0: List[Double] = List(1, 2, 1)
   val systems: List[String] = List("b1*(y2-y1)", "y1*(b2-y3)-y2", "y1*y2-b3*y3")
-  val reverseSystems: List[String] = List("F/(y2-y1)", "(F+y2)/y1+y3", "(y1*y2 - F)/y3")
+  val reverseSystems: List[String] = List("F1/(y2-y1)", "(F2+y2)/y1+y3", "(y1*y2 - F3)/y3")
 
-  val positivePreciseObservations: List[List[Double]] = (1 to n).foldLeft(List(yi0))((acc, itr) => {
-    acc :+ systems.zipWithIndex.map(fun_index => acc.last(fun_index._2) + h * calkFun(fun_index._1, acc.last))
-  })
+  bi.zipWithIndex.foreach(b_index => addConstant(createConstant(s"b${b_index._2 + 1}", b_index._1)))
 
-  val negativePreciseObservations: List[List[Double]] = (1 to n).foldRight(List(yi0))((itr, acc) => {
-    systems.zipWithIndex.map(fun_index => acc.head(fun_index._2) - h * calkFun(fun_index._1, acc.head)) :: acc
-  }).init
+  val positivePreciseObservations: List[List[Double]] = (1 to n).foldLeft(List(yi0)) { (acc, itr) =>
+    acc:+ systems.zipWithIndex.map { case (fun, index) =>
+      acc.last(index) + h * calkFun(fun, acc.last)
+    }
+  }
+
+  val negativePreciseObservations: List[List[Double]] = (1 to n).foldRight(List(yi0)) { (itr, acc) =>
+    systems.zipWithIndex.map { case (fun, index) =>
+      acc.head(index) - h * calkFun(fun, acc.head)
+    } :: acc
+  }.init
 
   val preciseObservations: List[List[Double]] = (negativePreciseObservations ::: positivePreciseObservations).transpose
 
